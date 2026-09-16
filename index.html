@@ -329,7 +329,7 @@ footer .r{margin-left:auto}
 
 <nav class="nav" id="nav">
   <div class="nav-in">
-    <a class="brand" href="#top">DG<i>.</i></a>
+    <a class="brand" href="#home">DG<i>.</i></a>
     <ul id="navlinks">
       <li><a href="#experience">Experience</a></li>
       <li><a href="#projects">Projects</a></li>
@@ -341,7 +341,7 @@ footer .r{margin-left:auto}
   </div>
 </nav>
 
-<header class="hero" id="top">
+<header class="hero" id="home">
   <canvas id="scene" aria-hidden="true"></canvas>
   <div class="drag-hint">drag to rotate</div>
   <div class="hero-in" id="hero-in"></div>
@@ -651,7 +651,7 @@ var DEVICON = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/";
 })();
 
 /* ---------- SECTION HELPERS ---------- */
-function top(kicker, title, note){
+function secHead(kicker, title, note){
   return '<div class="sec-top rv"><div class="kicker">' + esc(kicker) + '</div>' +
     '<h2>' + esc(title) + '</h2>' +
     (note ? '<p class="sec-note">' + esc(note) + '</p>' : '') + '</div>';
@@ -678,7 +678,7 @@ function expBlock(){
       '</ul></article>';
   }).join("");
   return '<section class="sec wrap" id="experience">' +
-    top("01 / experience", "Where I work",
+    secHead("01 / experience", "Where I work",
       "I joined Zapcom as an intern in January 2026 and converted to full-time in July.") +
     jobs + '</section>';
 }
@@ -722,7 +722,7 @@ function projBlock(){
   }).join("");
 
   return '<section class="sec wrap" id="projects">' +
-    top("02 / projects", "Selected work", "Most of this is on GitHub. Filter by what you care about.") +
+    secHead("02 / projects", "Selected work", "Most of this is on GitHub. Filter by what you care about.") +
     '<div class="filters rv" role="group" aria-label="Filter projects">' + chips + '</div>' +
     '<div class="cards" id="cards">' + cards + '</div></section>';
 }
@@ -794,7 +794,7 @@ function chartCard(d, svg){
 
 function numbersBlock(){
   return '<section class="sec wrap" id="numbers">' +
-    top("03 / numbers", "By the numbers", "The parts of my work that are actually measurable.") +
+    secHead("03 / numbers", "By the numbers", "The parts of my work that are actually measurable.") +
     '<div class="charts">' +
       chartCard(SITE.latency, barsH(SITE.latency)) +
       chartCard(SITE.testing, barsV(SITE.testing)) +
@@ -811,7 +811,7 @@ function eduBlock(){
       (p.mark ? '<span class="mk">' + esc(p.mark) + '</span>' : '') + '</li>';
   }).join("");
   return '<section class="sec wrap" id="education">' +
-    top("04 / education", "How I got here",
+    secHead("04 / education", "How I got here",
       "I took the diploma route rather than intermediate, which meant entering engineering laterally.") +
     '<ol class="tl rv">' + items + '</ol></section>';
 }
@@ -824,7 +824,7 @@ function rowsBlock(id, kicker, title, note, arr){
       (r.sub ? '<span class="sub">' + esc(r.sub) + '</span>' : '') +
       (r.date ? '<span class="date">' + esc(r.date) + '</span>' : '') + '</li>';
   }).join("");
-  return '<section class="sec wrap" id="' + id + '">' + top(kicker, title, note) +
+  return '<section class="sec wrap" id="' + id + '">' + secHead(kicker, title, note) +
     '<ul class="rows rv">' + items + '</ul></section>';
 }
 
@@ -844,7 +844,7 @@ function beyondBlock(){
       '<ul class="langs">' + langs + '</ul></div></div>'
     : '';
   return '<section class="sec wrap" id="beyond">' +
-    top("06 / beyond work", "Away from the keyboard", SITE.origin) +
+    secHead("06 / beyond work", "Away from the keyboard", SITE.origin) +
     '<div class="beyond-wrap rv"><div class="hobbies">' + hobs + '</div>' + photo + '</div></section>';
 }
 
@@ -855,7 +855,7 @@ function kitBlock(){
       k.items.map(function(i){ return '<li>' + esc(i) + '</li>'; }).join("") + '</ul></div>';
   }).join("");
   return '<section class="sec wrap" id="skills">' +
-    top("07 / skills", "Toolkit", "Things I've shipped something real with, not things I've read about.") +
+    secHead("07 / skills", "Toolkit", "Things I've shipped something real with, not things I've read about.") +
     '<div class="kit rv">' + cols + '</div></section>';
 }
 
