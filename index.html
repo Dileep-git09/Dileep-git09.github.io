@@ -386,10 +386,9 @@ footer .in{max-width:var(--wrap);margin:0 auto;padding-inline:var(--pad);
   border:1px solid var(--line2);border-radius:50%;color:var(--dim);text-decoration:none;
   transition:border-color .18s,color .18s,transform .3s cubic-bezier(.2,.7,.3,1)}
 .back-top:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-3px)}
-.foot-bottom{display:flex;flex-wrap:wrap;gap:.4rem 1.5rem;padding-top:1.4rem;border-top:1px solid var(--line)}
+.foot-bottom{padding-top:1.4rem;border-top:1px solid var(--line)}
 .foot-bottom p{margin:0;max-width:none}
-.foot-bottom .r{margin-left:auto}
-@media(max-width:620px){.foot-social{margin-left:0}.foot-bottom .r{margin-left:0}}
+@media(max-width:620px){.foot-social{margin-left:0}}
 </style>
 </head>
 
@@ -686,8 +685,7 @@ const SITE = {
   contact:{
     lede:"Let's build something",
     sub:"I'm in Hyderabad and open to backend and full-stack roles. Email is the fastest way to reach me."
-  },
-  footer:"Single HTML file. No framework."
+  }
 };
 
 /* ╔════════════════════════════════════════════════════════════════╗
@@ -1025,7 +1023,6 @@ document.getElementById("main").innerHTML = [
     '</div>' +
     '<div class="foot-bottom">' +
       '<p>© 2026 ' + esc(SITE.first + " " + SITE.last) + ' · ' + esc(SITE.location) + '</p>' +
-      '<p class="r">' + esc(SITE.footer) + '</p>' +
     '</div>';
 })();
 
