@@ -31,8 +31,7 @@
   --wrap:1200px;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;scroll-padding-top:70px}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+html{scroll-behavior:auto;-webkit-text-size-adjust:100%;scroll-padding-top:70px}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
   font-size:15.5px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 ::selection{background:var(--accent);color:#06080C}
@@ -911,7 +910,7 @@ function numbersBlock(){
 /* ---------- EDUCATION ---------- */
 function eduBlock(){
   if (!has(SITE.path)) return "";
-  var items = SITE.path.map(function(p){
+  var items = SITE.path.slice().reverse().map(function(p){
     return '<li class="' + (p.hi ? 'hi' : '') + '"><span class="yr">' + esc(p.yr) + '</span>' +
       '<h3>' + esc(p.title) + '</h3><p class="sub">' + esc(p.sub) + '</p>' +
       (p.mark ? '<span class="mk">' + esc(p.mark) + '</span>' : '') + '</li>';
@@ -1018,10 +1017,31 @@ var HAS_GSAP = typeof gsap !== "undefined";
 
 /* ---------- SMOOTH SCROLL (Lenis) ---------- */
 (function(){
-  if (REDUCE || typeof Lenis === "undefined") return;
-  var lenis = new Lenis({ duration: 1.05, smoothWheel: true });
+  if (REDUCE) return;
+  if (typeof Lenis === "undefined"){
+    document.documentElement.style.scrollBehavior = "smooth";
+    return;
+  }
+  var lenis = new Lenis({
+    duration: 1.2,
+    easing: function(t){ return 1 - Math.pow(1 - t, 3); },
+    smoothWheel: true
+  });
   function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
   requestAnimationFrame(raf);
+
+  // route in-page anchor links (nav, hero CTA, "Get in touch") through Lenis too,
+  // otherwise clicking them would jump instantly and fight the wheel-scroll easing
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener("click", function(e){
+      var href = a.getAttribute("href");
+      if (!href || href === "#") return;
+      var target = document.querySelector(href);
+      if (!target) return;
+      e.preventDefault();
+      lenis.scrollTo(target, { offset: -64, duration: 1.3 });
+    });
+  });
 })();
 
 /* ---------- CUSTOM CURSOR ---------- */
