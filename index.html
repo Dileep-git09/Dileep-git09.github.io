@@ -159,7 +159,7 @@ html.cur-down #cur-ring{width:24px;height:24px}
 #scene{position:absolute;inset:0;width:100%;height:100%;z-index:0}
 .hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(900px 600px at 78% 45%,transparent 30%,var(--bg) 82%),
-             linear-gradient(90deg,var(--bg) 8%,rgba(247,248,250,.55) 42%,transparent 62%)}
+             linear-gradient(90deg,var(--bg) 8%,var(--bg) 47%,rgba(247,248,250,.7) 63%,transparent 82%)}
 .hero-in{position:relative;z-index:2;max-width:var(--wrap);margin:0 auto;
   padding:3rem var(--pad);width:100%}
 .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);
@@ -426,7 +426,7 @@ footer .in{max-width:var(--wrap);margin:0 auto;padding-inline:var(--pad);
 :root[data-theme="dark"] .eyebrow{background:rgba(17,20,27,.7)}
 :root[data-theme="dark"] .drag-hint{background:rgba(17,20,27,.7)}
 :root[data-theme="dark"] .hero::after{background:radial-gradient(900px 600px at 78% 45%,transparent 30%,var(--bg) 82%),
-             linear-gradient(90deg,var(--bg) 8%,rgba(10,12,16,.55) 42%,transparent 62%)}
+             linear-gradient(90deg,var(--bg) 8%,var(--bg) 47%,rgba(10,12,16,.7) 63%,transparent 82%)}
 :root[data-theme="dark"] .btn:hover{background:#1D2330}
 :root[data-theme="dark"] .mesh{mix-blend-mode:screen;opacity:.4}
 :root[data-theme="dark"] .mesh.c{opacity:.22}
@@ -571,7 +571,7 @@ const SITE = {
     {
       company:"Zapcom Solutions",
       title:"Software Development Engineer I",
-      product:"Viva Voyage — business travel platform",
+      product:"Business travel platform (client project)",
       when:"Jan 2026 – present",
       points:[
         "<b>Shipped a URL shortener end to end.</b> Backend through Next.js frontend, with a hybrid Base62 / SHA-256 / Snowflake-ID scheme so short codes are idempotent and never collide.",
@@ -641,10 +641,10 @@ const SITE = {
       links:[{label:"Source",url:"https://github.com/Dileep-git09/Face-Mask-Detector"}]
     },
     {
-      name:"Viva Voyage", kind:"Work · business travel platform", year:"2026",
+      name:"Business travel platform", kind:"Work · client project", year:"2026",
       tags:["Backend","Node","Full-stack"], status:"nda",
       flow:["Next.js","Express","Prisma","PostgreSQL","SES / SQS","DLQ"],
-      blurb:"The platform I work on at Zapcom. The code is internal, but the URL shortener, the notification and email system, and the connection-pool debugging above all live here.",
+      blurb:"A client business travel platform I work on at Zapcom. The code is internal, but the URL shortener, the notification and email system, and the connection-pool debugging above all live here.",
       stack:["Node.js","TypeScript","Express","PostgreSQL","Prisma","Next.js","AWS"],
       details:[], links:[]
     },
@@ -668,7 +668,7 @@ const SITE = {
   testing:{
     title:"Tests I've written",
     cap:"Across work and personal projects.",
-    rows:[{l:"Viva Voyage",v:405},{l:"InterviewEdge",v:90},{l:"CBIT Guru",v:43}]
+    rows:[{l:"Work project",v:405},{l:"InterviewEdge",v:90},{l:"CBIT Guru",v:43}]
   },
   radar:{
     title:"Where I'm strongest",
@@ -686,7 +686,7 @@ const SITE = {
       sub:"Chaitanya Bharathi Institute of Technology, Hyderabad — 8.05 / 10",
       mark:"TS ECET rank 662", hi:true },
     { yr:"Jan 2026", title:"Software engineering intern, Zapcom Solutions",
-      sub:"Started on Viva Voyage while finishing my final year and major project", mark:"" },
+      sub:"Started on a client project while finishing my final year and major project", mark:"" },
     { yr:"Jul 2026", title:"Software Development Engineer I",
       sub:"Converted to full-time on the same team, with wider ownership", mark:"", hi:true }
   ],
@@ -809,6 +809,12 @@ var DEVICON = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/";
   gsap.from(".hero .sub, .hero .lede, .hero-cta", {
     opacity: 0, y: 16, duration: .8, ease: "power3.out", stagger: .08, delay: 1
   });
+  // safety net: guarantee the hero ends up fully visible even if GSAP's
+  // ticker never progresses (e.g. an extreme-throttling edge case)
+  setTimeout(function(){
+    gsap.set(chars, { yPercent: 0, opacity: 1 });
+    gsap.set(".hero .sub, .hero .lede, .hero-cta", { opacity: 1, y: 0 });
+  }, 2600);
 })();
 
 /* ---------- MARQUEE ---------- */
@@ -1207,15 +1213,18 @@ var HAS_GSAP = typeof gsap !== "undefined";
     [].slice.call(box.querySelectorAll(".n")).forEach(function(el){
       var to = +el.dataset.to, sfx = el.dataset.suffix || "";
       if (reduce){ el.textContent = to + sfx; return; }
-      var t0 = null, dur = 1200;
+      var t0 = null, dur = 1200, done = false;
+      var finish = function(){ if (done) return; done = true; el.textContent = to + sfx; };
       var step = function(ts){
+        if (done) return;
         if (!t0) t0 = ts;
         var p = Math.min(1, (ts - t0) / dur);
         var e = 1 - Math.pow(1 - p, 3);
         el.textContent = Math.round(to * e) + sfx;
-        if (p < 1) requestAnimationFrame(step);
+        if (p < 1) requestAnimationFrame(step); else finish();
       };
       requestAnimationFrame(step);
+      setTimeout(finish, dur + 600); // safety net: guarantee the real number even if rAF stalls
     });
   };
   if (!("IntersectionObserver" in window)) return run();
