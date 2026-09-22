@@ -129,6 +129,7 @@ Added on top of the original layout, all as progressive enhancement:
 
 | Feature | What it does |
 |---|---|
+| Light/dark toggle | The circle button in the nav. Defaults to the visitor's OS preference (light if none), remembers the choice in `localStorage`, and live-updates the 3D hero's colors too — not just a page reload. |
 | Loader | Brief branded intro on first paint, skipped instantly under reduced motion. |
 | Lenis smooth scroll | Eases native scrolling; every existing scroll listener (nav, reveals) keeps working untouched. |
 | Custom cursor | Dot + lagging ring, desktop only (`pointer:fine`), expands over links/cards/buttons. |
