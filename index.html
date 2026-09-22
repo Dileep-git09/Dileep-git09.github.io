@@ -596,6 +596,7 @@ const SITE = {
         {h:"Two-tier response cache", p:"Exact string match first, then cosine paraphrase matching bucketed by script — so a hundred students asking the same thing costs one round trip."},
         {h:"Fails fast, not slowly", p:"Concurrency cap, per-call timeouts and a circuit breaker, so one provider outage doesn't turn into every request paying a futile retry."},
         {h:"Observable by default", p:"Request IDs threaded through every log line, Prometheus counters on /metrics, and separate liveness and readiness probes."},
+        {h:"Refreshes itself weekly", p:"A scheduled job re-scrapes the institute site, diffs against what's already indexed, and only re-embeds what changed — so the knowledge base doesn't go stale between major project updates."},
         {h:"43 checks, no API spend", p:"An offline smoke test runs the whole pipeline against in-memory Qdrant with stubbed providers. It runs on every push, with linting and a frontend build."}
       ],
       links:[{label:"Live site",url:"https://cbit-guru.vercel.app",key:true},
@@ -603,16 +604,19 @@ const SITE = {
     },
     {
       name:"InterviewEdge", kind:"AI product · MERN", year:"2026",
-      tags:["AI","Full-stack","Node"], status:"",
+      tags:["AI","Full-stack","Node"], status:"live",
       flow:["client","Express","CDN","Redis","MongoDB","Gemini","Groq fallback"],
       blurb:"Interview-prep platform with Gemini 2.5 Flash as the primary model and a Groq Llama 3.3 70B fallback, plus a four-strategy JSON-repair layer so structured output stays reliable when a model misbehaves.",
-      stack:["React 19","Express 5","MongoDB","Redis","JWT","Jest"],
+      stack:["React 19","Vite","Tailwind CSS","Express 5","MongoDB","Redis","JWT","Jest"],
       details:[
+        {h:"Resume-aware question generation", p:"Upload a PDF/DOC résumé and get section-aware questions an interviewer would actually ask about your own projects, on top of the standard role/topic-based generator."},
+        {h:"Timed mock interviews with AI scoring", p:"A real per-question countdown, then AI-graded strengths/improvements/missed points per answer and an overall debrief — plus a leaderboard ranked by best score per role, with a one-tap privacy opt-out."},
         {h:"Three-tier cache", p:"CDN, then Redis, then MongoDB, with normalised keys and tiered TTLs to cut redundant AI calls and latency."},
         {h:"Production-readiness audit", p:"Hardened CORS, centralised error handling, fixed ownership-based authorisation (IDOR) bugs, and rate-limited auth and AI routes."},
         {h:"90 tests", p:"Jest and Supertest, including load and resilience runs, alongside full technical docs, a Postman collection and an n8n automation workflow."}
       ],
-      links:[]
+      links:[{label:"Live site",url:"https://interviewedge-ten.vercel.app",key:true},
+             {label:"Source",url:"https://github.com/Dileep-git09/InterviewEdge.ai"}]
     },
     {
       name:"NIFTY scalping bot", kind:"Trading systems", year:"2025",
@@ -629,7 +633,8 @@ const SITE = {
       flow:["extract","transform","load","LSTM","forecast"],
       blurb:"Linear regression and LSTM models over AAPL with a full ETL pipeline feeding them. Reached 85% directional accuracy and cut RMSE 15% below the baseline.",
       stack:["TensorFlow","scikit-learn","pandas","NumPy"],
-      details:[], links:[]
+      details:[],
+      links:[{label:"Source",url:"https://github.com/Dileep-git09/AAPL-Apple-stock-price-prediction-"}]
     },
     {
       name:"Face mask detector", kind:"Computer vision", year:"2024",
