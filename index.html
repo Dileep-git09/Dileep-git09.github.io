@@ -421,6 +421,47 @@ footer .in{max-width:var(--wrap);margin:0 auto;padding-inline:var(--pad);
 :root[data-theme="dark"] .theme-toggle .moon{display:none}
 :root[data-theme="dark"] .theme-toggle .sun{display:block}
 
+/* ───────── COMMAND PALETTE ───────── */
+.palette-btn{display:flex;align-items:center;gap:.4rem;height:36px;flex:none;padding:0 .7rem;
+  border:1px solid var(--line2);border-radius:20px;background:var(--bg3);color:var(--faint);
+  cursor:pointer;font-size:.8rem;transition:border-color .18s,color .18s,transform .3s cubic-bezier(.2,.7,.3,1)}
+.palette-btn:hover{border-color:var(--accent);color:var(--ink);transform:translateY(-2px)}
+.palette-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.palette-btn kbd{font-family:var(--mono);font-size:.68rem;border:1px solid var(--line2);border-radius:4px;
+  padding:.05rem .3rem;line-height:1.4}
+@media(max-width:560px){.palette-btn .lbl{display:none}}
+
+.palette-overlay{position:fixed;inset:0;z-index:500;background:rgba(6,8,12,.55);
+  display:flex;align-items:flex-start;justify-content:center;padding:12vh 1rem 1rem;
+  opacity:0;visibility:hidden;transition:opacity .2s ease,visibility .2s ease}
+.palette-overlay.open{opacity:1;visibility:visible}
+.palette{width:min(560px,100%);max-height:min(60vh,480px);background:var(--bg2);
+  border:1px solid var(--line2);border-radius:14px;box-shadow:0 24px 64px rgba(0,0,0,.35);
+  overflow:hidden;display:flex;flex-direction:column;
+  transform:translateY(-14px) scale(.98);transition:transform .25s cubic-bezier(.2,.7,.3,1)}
+.palette-overlay.open .palette{transform:none}
+@media(prefers-reduced-motion:reduce){.palette-overlay,.palette{transition:none}}
+.palette-input-wrap{display:flex;align-items:center;gap:.7rem;padding:.9rem 1.1rem;
+  border-bottom:1px solid var(--line);flex:none}
+.palette-input-wrap svg{width:16px;height:16px;stroke:var(--faint);fill:none;stroke-width:2;flex:none}
+.palette-input{flex:1;border:0;background:transparent;font:inherit;font-size:.95rem;
+  color:var(--ink);outline:none;min-width:0}
+.palette-input::placeholder{color:var(--faint)}
+.palette-esc{font-family:var(--mono);font-size:.68rem;color:var(--faint);border:1px solid var(--line);
+  border-radius:5px;padding:.15rem .4rem;flex:none}
+.palette-list{overflow-y:auto;padding:.5rem}
+.palette-group{font-family:var(--mono);font-size:.66rem;color:var(--faint);text-transform:uppercase;
+  letter-spacing:.06em;padding:.7rem .7rem .35rem}
+.palette-group:first-child{padding-top:.4rem}
+.palette-item{display:flex;align-items:center;gap:.7rem;padding:.6rem .7rem;border-radius:8px;
+  cursor:pointer;font-size:.89rem;color:var(--ink)}
+.palette-item .ic{width:18px;text-align:center;flex:none;color:var(--faint);font-family:var(--mono);font-size:.85rem}
+.palette-item .lbl-sub{margin-left:auto;color:var(--faint);font-size:.78rem;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:38%}
+.palette-item.active{background:var(--accent-dim)}
+.palette-item.active .ic{color:var(--accent)}
+.palette-empty{padding:2rem 1rem;text-align:center;color:var(--faint);font-size:.88rem}
+
 /* ───────── DARK-THEME OVERRIDES for values that can't be plain CSS vars ───────── */
 :root[data-theme="dark"] .nav{background:rgba(10,12,16,.72)}
 :root[data-theme="dark"] .eyebrow{background:rgba(17,20,27,.7)}
@@ -448,6 +489,17 @@ footer .in{max-width:var(--wrap);margin:0 auto;padding-inline:var(--pad);
 <div id="cur-dot" aria-hidden="true"></div>
 <div id="cur-ring" aria-hidden="true"></div>
 
+<div class="palette-overlay" id="paletteOverlay" role="presentation">
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette">
+    <div class="palette-input-wrap">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input class="palette-input" id="paletteInput" type="text" placeholder="Jump to a section, project, or action…" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="true" aria-controls="paletteList">
+      <span class="palette-esc">Esc</span>
+    </div>
+    <div class="palette-list" id="paletteList" role="listbox"></div>
+  </div>
+</div>
+
 <a class="skip" href="#main">Skip to content</a>
 
 <nav class="nav" id="nav">
@@ -460,6 +512,10 @@ footer .in{max-width:var(--wrap);margin:0 auto;padding-inline:var(--pad);
       <li><a href="#education">Education</a></li>
       <li><a href="#beyond">Beyond</a></li>
     </ul>
+    <button class="palette-btn" id="paletteBtn" type="button" aria-label="Open command palette" aria-haspopup="dialog">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <span class="lbl">Search</span><kbd>⌘K</kbd>
+    </button>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark theme">
       <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       <svg class="sun" viewBox="0 0 24 24" aria-hidden="true">
@@ -757,6 +813,7 @@ const SITE = {
 var esc = function(s){ return String(s == null ? "" : s)
   .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); };
 var has = function(a){ return Array.isArray(a) && a.length > 0; };
+var slugify = function(s){ return "proj-" + String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); };
 var DEVICON = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/";
 
 /* ---------- HERO ---------- */
@@ -898,7 +955,7 @@ function projBlock(){
         return '<a class="btn btn-sm' + (l.key ? ' btn-key' : '') + '" href="' + esc(l.url) +
           '" rel="noopener">' + esc(l.label) + '</a>'; }).join("") + '</div>' : '';
 
-    return '<article class="card rv" data-tags="' + esc(p.tags.join(",")) + '" style="transition-delay:' + ((i % 3) * 90) + 'ms">' +
+    return '<article class="card rv" id="' + slugify(p.name) + '" data-tags="' + esc(p.tags.join(",")) + '" style="transition-delay:' + ((i % 3) * 90) + 'ms">' +
       '<span class="num">' + num + '</span>' +
       '<div class="card-h"><h3>' + esc(p.name) + '</h3>' + badge + '</div>' +
       '<span class="kind">' + esc(p.kind) + ' · ' + esc(p.year) + '</span>' +
@@ -1114,23 +1171,28 @@ var HAS_GSAP = typeof gsap !== "undefined";
   });
 })();
 
-/* ---------- SMOOTH SCROLL (Lenis) ---------- */
+/* ---------- SCROLL-TO-TARGET (native, independent of any animation loop) ---------- */
+// Deliberately NOT routed through Lenis: Lenis's scrollTo is a tween driven by its
+// own requestAnimationFrame loop, so if that loop ever stalls (throttled/backgrounded
+// tab), the jump would silently do nothing. Native scrollTo only depends on the
+// browser itself, so nav links, the hero CTA and the command palette always arrive.
 (function(){
-  if (REDUCE) return;
-  if (typeof Lenis === "undefined"){
-    document.documentElement.style.scrollBehavior = "smooth";
-    return;
+  function scrollToTarget(target, opts){
+    if (typeof target === "string") target = document.querySelector(target);
+    if (!target) return;
+    var offset = (opts && typeof opts.offset === "number") ? opts.offset : -64;
+    var top = Math.max(0, target.getBoundingClientRect().top + window.pageYOffset + offset);
+    try { window.scrollTo({ top: top, behavior: REDUCE ? "auto" : "smooth" }); }
+    catch (e){ window.scrollTo(0, top); }
+    // safety net: the options-object form of scrollTo (or its animation) can silently
+    // no-op in some environments — verify we actually arrived and force it if not,
+    // using the universally-supported two-argument form
+    setTimeout(function(){
+      if (Math.abs(window.scrollY - top) > 4) window.scrollTo(0, top);
+    }, REDUCE ? 0 : 900);
   }
-  var lenis = new Lenis({
-    duration: 1.2,
-    easing: function(t){ return 1 - Math.pow(1 - t, 3); },
-    smoothWheel: true
-  });
-  function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
-  requestAnimationFrame(raf);
+  window.__scrollTo = scrollToTarget;
 
-  // route in-page anchor links (nav, hero CTA, "Get in touch") through Lenis too,
-  // otherwise clicking them would jump instantly and fight the wheel-scroll easing
   document.querySelectorAll('a[href^="#"]').forEach(function(a){
     a.addEventListener("click", function(e){
       var href = a.getAttribute("href");
@@ -1138,9 +1200,21 @@ var HAS_GSAP = typeof gsap !== "undefined";
       var target = document.querySelector(href);
       if (!target) return;
       e.preventDefault();
-      lenis.scrollTo(target, { offset: -64, duration: 1.3 });
+      scrollToTarget(target);
     });
   });
+})();
+
+/* ---------- SMOOTH WHEEL SCROLL (Lenis) ---------- */
+(function(){
+  if (REDUCE || typeof Lenis === "undefined") return;
+  var lenis = new Lenis({
+    duration: 1.2,
+    easing: function(t){ return 1 - Math.pow(1 - t, 3); },
+    smoothWheel: true
+  });
+  function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
+  requestAnimationFrame(raf);
 })();
 
 /* ---------- CUSTOM CURSOR ---------- */
@@ -1308,6 +1382,157 @@ var HAS_GSAP = typeof gsap !== "undefined";
   apply(document.documentElement.dataset.theme || "light");
   btn.addEventListener("click", function(){
     apply(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+  });
+})();
+
+/* ---------- COMMAND PALETTE (Cmd/Ctrl+K) ---------- */
+(function(){
+  var btn = document.getElementById("paletteBtn");
+  var overlay = document.getElementById("paletteOverlay");
+  var input = document.getElementById("paletteInput");
+  var list = document.getElementById("paletteList");
+  if (!btn || !overlay || !input || !list) return;
+
+  var L = SITE.links;
+  var ICON = { nav: "#", project: "▸", link: "↗", action: "⌘" };
+
+  function go(sel){
+    close();
+    var scrollFn = window.__scrollTo || function(s){ var t = document.querySelector(s); if (t) t.scrollIntoView(); };
+    scrollFn(sel);
+  }
+  function copy(text, item){
+    var flash = function(){
+      var subEl = item.el && item.el.querySelector(".lbl-sub");
+      if (!subEl) return;
+      var old = subEl.textContent;
+      subEl.textContent = "Copied ✓";
+      setTimeout(function(){ subEl.textContent = old; }, 900);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(flash, flash);
+    else flash();
+    setTimeout(close, 500);
+  }
+  function downloadResume(){
+    var a = document.createElement("a");
+    a.href = SITE.resume; a.download = "";
+    document.body.appendChild(a); a.click(); a.remove();
+    close();
+  }
+
+  function buildCommands(){
+    var cmds = [{ group: "Navigate", label: "Home", sub: "", icon: ICON.nav, run: function(){ go("#home"); } }];
+    [["Experience", "#experience"], ["Projects", "#projects"], ["Numbers", "#numbers"],
+     ["Education", "#education"], ["Beyond", "#beyond"], ["Skills", "#skills"], ["Contact", "#contact"]]
+      .forEach(function(s){
+        if (!document.querySelector(s[1])) return;
+        cmds.push({ group: "Navigate", label: s[0], sub: "", icon: ICON.nav, run: function(){ go(s[1]); } });
+      });
+
+    SITE.projects.forEach(function(p){
+      cmds.push({
+        group: "Projects", label: p.name, sub: p.kind, icon: ICON.project,
+        run: function(){ go("#" + slugify(p.name)); }
+      });
+    });
+
+    var dark = document.documentElement.dataset.theme === "dark";
+    cmds.push({ group: "Actions", label: "Copy email", sub: L.email, icon: ICON.action,
+      run: function(item){ copy(L.email, item); } });
+    cmds.push({ group: "Actions", label: "Email me", sub: L.email, icon: ICON.link,
+      run: function(){ close(); window.location.href = "mailto:" + L.email; } });
+    cmds.push({ group: "Actions", label: "Download résumé", sub: "", icon: ICON.action, run: downloadResume });
+    cmds.push({ group: "Actions", label: "Toggle theme", sub: dark ? "Switch to light" : "Switch to dark", icon: ICON.action,
+      run: function(){ close(); var t = document.getElementById("themeToggle"); if (t) t.click(); } });
+    cmds.push({ group: "Actions", label: "Open GitHub", sub: "github.com", icon: ICON.link,
+      run: function(){ close(); window.open(L.github, "_blank", "noopener"); } });
+    cmds.push({ group: "Actions", label: "Open LinkedIn", sub: "linkedin.com", icon: ICON.link,
+      run: function(){ close(); window.open(L.linkedin, "_blank", "noopener"); } });
+    if (L.leetcode) cmds.push({ group: "Actions", label: "Open LeetCode", sub: "leetcode.com", icon: ICON.link,
+      run: function(){ close(); window.open(L.leetcode, "_blank", "noopener"); } });
+    return cmds;
+  }
+
+  var ALL = [], filtered = [], activeIndex = 0, lastFocus = null;
+
+  function markActive(){
+    [].slice.call(list.querySelectorAll(".palette-item")).forEach(function(el){
+      var on = +el.dataset.i === activeIndex;
+      el.classList.toggle("active", on);
+      el.setAttribute("aria-selected", String(on));
+    });
+    var activeEl = list.querySelector(".palette-item.active");
+    if (activeEl) activeEl.scrollIntoView({ block: "nearest" });
+  }
+
+  function render(){
+    if (!filtered.length){
+      list.innerHTML = '<div class="palette-empty">No matches</div>';
+      return;
+    }
+    var groups = [], seen = {};
+    filtered.forEach(function(c){ if (!seen[c.group]){ seen[c.group] = true; groups.push(c.group); } });
+    var html = "";
+    groups.forEach(function(g){
+      html += '<div class="palette-group">' + esc(g) + '</div>';
+      filtered.forEach(function(c, i){
+        if (c.group !== g) return;
+        html += '<div class="palette-item" role="option" data-i="' + i + '">' +
+          '<span class="ic">' + c.icon + '</span><span class="lbl">' + esc(c.label) + '</span>' +
+          (c.sub ? '<span class="lbl-sub">' + esc(c.sub) + '</span>' : '') + '</div>';
+      });
+    });
+    list.innerHTML = html;
+    [].slice.call(list.querySelectorAll(".palette-item")).forEach(function(el){
+      var i = +el.dataset.i;
+      filtered[i].el = el;
+      el.addEventListener("mouseenter", function(){ activeIndex = i; markActive(); });
+      el.addEventListener("click", function(){ filtered[i].run(filtered[i]); });
+    });
+    markActive();
+  }
+
+  function filter(){
+    var q = input.value.trim().toLowerCase();
+    filtered = !q ? ALL : ALL.filter(function(c){
+      return (c.group + " " + c.label + " " + c.sub).toLowerCase().indexOf(q) !== -1;
+    });
+    activeIndex = 0;
+    render();
+  }
+
+  function isOpen(){ return overlay.classList.contains("open"); }
+  function open(){
+    lastFocus = document.activeElement;
+    ALL = buildCommands();
+    input.value = "";
+    filter();
+    overlay.classList.add("open");
+    document.body.style.overflow = "hidden";
+    setTimeout(function(){ input.focus(); }, 10);
+  }
+  function close(){
+    if (!isOpen()) return;
+    overlay.classList.remove("open");
+    document.body.style.overflow = "";
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  btn.addEventListener("click", function(){ isOpen() ? close() : open(); });
+  overlay.addEventListener("mousedown", function(e){ if (e.target === overlay) close(); });
+  input.addEventListener("input", filter);
+
+  document.addEventListener("keydown", function(e){
+    if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")){
+      e.preventDefault();
+      isOpen() ? close() : open();
+      return;
+    }
+    if (!isOpen()) return;
+    if (e.key === "Escape"){ e.preventDefault(); close(); }
+    else if (e.key === "ArrowDown"){ e.preventDefault(); if (filtered.length){ activeIndex = (activeIndex + 1) % filtered.length; markActive(); } }
+    else if (e.key === "ArrowUp"){ e.preventDefault(); if (filtered.length){ activeIndex = (activeIndex - 1 + filtered.length) % filtered.length; markActive(); } }
+    else if (e.key === "Enter"){ e.preventDefault(); var c = filtered[activeIndex]; if (c) c.run(c); }
   });
 })();
 
