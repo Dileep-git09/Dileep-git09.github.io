@@ -308,6 +308,7 @@ details.more[open] summary::after{content:" \2212"}
 .chart h3{font-size:1rem;margin-bottom:.25rem}
 .chart .cap{font-size:.8rem;color:var(--faint);margin-bottom:1.2rem}
 .chart svg{width:100%;height:auto;overflow:visible}
+.gh-graph{width:100%;height:auto;display:block;border-radius:8px;background:var(--bg3)}
 .bar-h{fill:var(--accent)}
 .bar-g{fill:var(--line2)}
 .axis{stroke:var(--line);stroke-width:1}
@@ -475,9 +476,66 @@ footer .in{max-width:var(--wrap);margin:0 auto;padding-inline:var(--pad);
 :root[data-theme="dark"] .badge.live{background:rgba(52,211,166,.12)}
 :root[data-theme="dark"] .badge.wip{color:#E8B341;background:rgba(232,179,65,.12)}
 :root[data-theme="dark"] .radar-area{fill:rgba(76,141,255,.2)}
+:root[data-theme="dark"] .gh-graph{filter:brightness(.62) contrast(1.15) saturate(1.2)}
 :root[data-theme="dark"] .job,:root[data-theme="dark"] .card,:root[data-theme="dark"] .chart,
 :root[data-theme="dark"] .kit-c,:root[data-theme="dark"] .hob,:root[data-theme="dark"] .contact-box,
 :root[data-theme="dark"] .photo-card,:root[data-theme="dark"] .rows li{box-shadow:none}
+
+/* ═════════════════════════════════════════════════════════════════
+   PRINT — Cmd/Ctrl+P should produce a clean, readable document,
+   not the dark 3D hero. Forces the light palette and strips every
+   screen-only/decorative/interactive element regardless of theme.
+   ═════════════════════════════════════════════════════════════════ */
+@media print{
+  :root,:root[data-theme="dark"]{
+    --bg:#fff; --bg2:#fff; --bg3:#f3f4f6;
+    --line:#ddd; --line2:#ccc;
+    --ink:#111; --dim:#444; --faint:#666;
+    --accent:#1d4ed8; --accent-dim:#eef2ff; --good:#0a7a5a;
+    color-scheme:light;
+  }
+  @page{ margin:1.4cm; }
+  *,*::before,*::after{ animation:none !important; transition:none !important; box-shadow:none !important; text-shadow:none !important; }
+  html,body{ background:#fff; }
+  body{ font-size:11pt; line-height:1.45; }
+
+  /* kill everything that only makes sense on a screen */
+  #loader, #cur-dot, #cur-ring, .palette-overlay, .palette-btn, .theme-toggle,
+  .nav, #scene, .mesh, .drag-hint, .hero-face, .marq, .filters,
+  .back-top, .foot-social, .card::after, #beyond,
+  .hero-cta, .eyebrow .dot, .flowstrip .pulse{ display:none !important; }
+
+  a{ text-decoration:none; color:var(--ink); }
+  .kicker::after{ display:none; }
+
+  /* hero collapses into a plain document header */
+  .hero{ min-height:auto; padding-top:0; overflow:visible; }
+  .hero::after{ display:none; }
+  .hero-in{ padding:0 0 10pt; max-width:none; }
+  .hero h1{ font-size:22pt; letter-spacing:-.01em; }
+  .hero .sub,.hero .lede{ font-size:10pt; max-width:none; }
+  .gchar{ opacity:1 !important; transform:none !important; } /* in case the split-text intro never ran */
+
+  .wrap{ max-width:none; padding-inline:0; }
+  .sec{ padding-block:9pt; break-inside:avoid; }
+  .rv{ opacity:1 !important; transform:none !important; } /* show content even if it never scrolled into view */
+
+  .job,.card,.chart,.kit-c,.contact-box,.rows li,.photo-card,.hob{
+    border:1px solid #ddd; background:#fff; break-inside:avoid;
+  }
+  .card[hidden]{ display:block !important; } /* ignore an active on-screen project filter */
+  .gh-activity{ display:none !important; } /* a live network image is meaningless on paper */
+
+  details.more{ border-top-color:#ddd; }
+  details.more summary{ color:var(--ink); font-weight:700; cursor:default; }
+  details.more summary::after{ display:none; }
+
+  .btn{ border:1px solid #999; color:#111; background:none; }
+  .stack li,.kit-c li,.pts code{ background:#f3f4f6; }
+
+  footer::before{ display:none; }
+  .foot-top{ border-bottom:1px solid #ddd; padding-bottom:8pt; }
+}
 </style>
 </head>
 
@@ -580,7 +638,7 @@ const SITE = {
     { n:405, suffix:"/405", label:"Backend tests green after debugging a pool failure" },
     { n:90,  suffix:"",     label:"Tests written for InterviewEdge, load and resilience included" },
     { n:5,   suffix:"",     label:"Languages CBIT Guru answers in, no extra models" },
-    { n:6,   suffix:" mo",  label:"From intern to SDE-1 at Zapcom" }
+    { n:15,  suffix:"",     label:"Public repos on GitHub, pulled live — not hand-edited", id:"gh-repo-stat" }
   ],
 
   /* logo marquee — devicon slugs; inv:true inverts dark logos */
@@ -900,7 +958,8 @@ function secHead(kicker, title, note){
 
 function statsBlock(){
   var cells = SITE.stats.map(function(s){
-    return '<div class="stat"><div class="n" data-to="' + s.n + '" data-suffix="' +
+    return '<div class="stat"><div class="n"' + (s.id ? ' id="' + esc(s.id) + '"' : "") +
+      ' data-to="' + s.n + '" data-suffix="' +
       esc(s.suffix) + '">0' + esc(s.suffix) + '</div>' +
       '<div class="l">' + esc(s.label) + '</div></div>';
   }).join("");
@@ -1035,6 +1094,17 @@ function chartCard(d, svg, i){
     '<p class="cap">' + esc(d.cap) + '</p>' + svg + '</div>';
 }
 
+function githubActivityCard(){
+  var user = SITE.links.github.replace(/\/$/, "").split("/").pop();
+  return '<div class="chart gh-activity rv" style="grid-column:1/-1;transition-delay:420ms">' +
+    '<h3>GitHub activity</h3>' +
+    '<p class="cap">Pulled live from GitHub on every visit — nobody’s hand-editing this one.</p>' +
+    '<img class="gh-graph" src="https://ghchart.rshah.org/2563EB/' + esc(user) + '" alt="' +
+      esc(user) + '’s GitHub contribution graph" loading="lazy" ' +
+      'onerror="this.closest(&quot;.gh-activity&quot;).style.display=&quot;none&quot;">' +
+    '</div>';
+}
+
 function numbersBlock(){
   return '<section class="sec wrap" id="numbers">' +
     secHead("03 / numbers", "By the numbers", "The parts of my work that are actually measurable.") +
@@ -1042,6 +1112,7 @@ function numbersBlock(){
       chartCard(SITE.latency, barsH(SITE.latency), 0) +
       chartCard(SITE.testing, barsV(SITE.testing), 1) +
       chartCard(SITE.radar, radar(SITE.radar), 2) +
+      githubActivityCard() +
     '</div></section>';
 }
 
@@ -1315,6 +1386,45 @@ var HAS_GSAP = typeof gsap !== "undefined";
     if (en[0].isIntersecting){ run(); io.disconnect(); }
   }, { threshold: 0.35 });
   io.observe(box);
+})();
+
+/* ---------- LIVE GITHUB REPO COUNT ---------- */
+// Replaces the static repo-count fallback with the real number from GitHub's
+// public API. If the fetch fails (offline, rate-limited, blocked) the
+// hand-written fallback in SITE.stats just stays put — nothing breaks.
+(function(){
+  var el = document.getElementById("gh-repo-stat");
+  if (!el) return;
+  var user = SITE.links.github.replace(/\/$/, "").split("/").pop();
+  fetch("https://api.github.com/users/" + encodeURIComponent(user))
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(data){
+      if (!data || !data.public_repos) return;
+      var val = data.public_repos;
+      el.dataset.to = val; // if the count-up hasn't run yet, it'll pick this up naturally
+      // if it already finished (fetch was slower than the scroll-into-view), correct it directly
+      setTimeout(function(){
+        var want = val + (el.dataset.suffix || "");
+        if (el.textContent !== want) el.textContent = want;
+      }, 2200);
+    })
+    .catch(function(){});
+})();
+
+/* ---------- PRINT: expand project details, ignore the active filter ---------- */
+(function(){
+  var reopen = [];
+  window.addEventListener("beforeprint", function(){
+    reopen = [];
+    [].slice.call(document.querySelectorAll("details.more")).forEach(function(d){
+      if (!d.open) reopen.push(d);
+      d.open = true;
+    });
+  });
+  window.addEventListener("afterprint", function(){
+    reopen.forEach(function(d){ d.open = false; });
+    reopen = [];
+  });
 })();
 
 /* ---------- FILTER ---------- */
