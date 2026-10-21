@@ -21,6 +21,8 @@ three.js, GSAP and Lenis are the only dependencies, and all three load from a CD
 │   └── Dileep_Guglavath_Resume.pdf   ← add this yourself
 ├── .github/workflows/
 │   └── deploy.yml              Auto-deploys to GitHub Pages on every push
+├── robots.txt                  Lets crawlers in and points them at the sitemap
+├── sitemap.xml                 The pages Google should index
 ├── .nojekyll                   Stops GitHub running Jekyll over the files
 ├── .gitignore
 └── README.md
@@ -68,7 +70,15 @@ Append to the `projects` array:
 - Filter chips are derived from every `tags` value across all projects.
 - **A section with an empty array hides itself**, along with its nav link.
   `writing: []` is empty on purpose — add one entry and the section appears.
-- A `Person` JSON-LD block for search engines is generated from `SITE`.
+- The `Person` JSON-LD block for search engines is static HTML in `<head>`,
+  so crawlers that don't run JavaScript still see it. It does **not** read from
+  `SITE`: update it by hand when your job title, links or education change.
+
+### Search engines
+
+`robots.txt` and `sitemap.xml` sit at the repo root. Bump `<lastmod>` in the
+sitemap when you make a big content change, and submit
+`https://dileep-git09.github.io/sitemap.xml` once in Google Search Console.
 
 ---
 
